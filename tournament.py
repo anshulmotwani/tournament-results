@@ -1,49 +1,72 @@
 #!/usr/bin/env python
-# 
 # tournament.py -- implementation of a Swiss-system tournament
 #
 
 import psycopg2
 
- 
+
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname=tournament")
 
-DB= psycopg2.connect("dbname=tournament")
-c = DB.cursor()
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    c.execute("DELETE FROM players;")
+    DB = connect()
+    c = DB.cursor()
+    c.execute("DELETE FROM matches;")
+    DB.commit()
+    DB.close()
+
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    c.execute("DELETE FROM matches;")
+    DB = connect()
+    c = DB.cursor()
+    c.execute("DELETE FROM players;")
+    DB.commit()
+    DB.close()
+
 
 def countPlayers():
     """Returns the number of players currently registered."""
+    DB = connect()
+    c = DB.cursor()
     c.execute("SELECT count(*) as num from players;")
-    count = c.fetchall()
-    return count
+    count = c.fetchone()
+    DB.commit()
+    return count[0]
+    DB.close()
+
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
-  
+
     The database assigns a unique serial id number for the player.  (This
     should be handled by your SQL database schema, not in your Python code.)
-  
+ 
     Args:
       name: the player's full name (need not be unique).
     """
-    c.execute("INSERT INTO players(name) VALUES(%s)",(name,))
+    DB = connect()
+    c = DB.cursor()
+    c.execute("INSERT INTO players(name) VALUES(%s)", (name, ))
+
+    c.execute("SELECT id from newplayerid")
+    
+    new_id = c.fetchone() 
+
+    c.execute("INSERT INTO matches VALUES(%s,0,0)", (new_id,))
+
+    DB.commit()
+    DB.close()
 
 
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
-    The first entry in the list should be the player in first place, or a player
-    tied for first place if there is currently a tie.
+    The first entry in the list should be the player in first place, or a 
+    player tied for first place if there is currently a tie.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -52,6 +75,14 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    DB = connect()
+    c = DB.cursor()
+    c.execute("SELECT * FROM standings")
+
+    pstandings = c.fetchall()
+
+    DB.close()
+    return pstandings
 
 
 def reportMatch(winner, loser):
@@ -61,6 +92,16 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
+    DB = connect()
+    c = DB.cursor()
+    c.execute('''UPDATE matches SET matches = matches + 1
+                WHERE player_id = %s or player_id = %s''', (winner, loser, ))
+
+    c.execute('''UPDATE matches SET wins = wins + 1 
+              WHERE player_id = %s''', (winner, ))
+
+    DB.commit()
+    DB.close()
  
  
 def swissPairings():
@@ -78,3 +119,18 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    DB = connect()
+    c = DB.cursor()
+    c.execute("SELECT id, name FROM standings")
+    all_players = c.fetchall()
+
+    DB.close()
+
+    pairing = []
+
+    while all_players:
+        pairing.append(all_players[0] + all_players[1])
+        del all_players[0:2]
+
+    return pairing
+    

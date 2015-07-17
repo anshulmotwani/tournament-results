@@ -6,30 +6,30 @@
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
 
+--Tables--
+
+DROP DATABASE tournament;
 CREATE DATABASE tournament;
-\c tournament;
+\c tournament
 
 CREATE TABLE players(
-	name VARCHAR,
-	id SERIAL PRIMARY KEY
+	name varchar NOT NULL,
+	id serial PRIMARY KEY
 );
 
 CREATE TABLE matches(
-	p1 VARCHAR,
-	p2 VARCHAR,
-	winner INTEGER references players(id)
+	player_id integer REFERENCES players(id) ON DELETE CASCADE,
+	wins integer NOT NULL,
+	matches integer NOT NULL
 );
 
-CREATE VIEW count_matches as 
-SELECT p1,count(*) as num from matches
-group by p1,p2;
+--Views--
 
-CREATE VIEW count_wins as
-SELECT p1, count(*) as wins from matches
-group by winner;
+CREATE VIEW newplayerid AS
+	SELECT id FROM players ORDER BY id DESC LIMIT 1;
 
-CREATE VIEW standings as
-SELECT p1, count(*) as wins from matches
-group by winner
-order by winner DESC;
 
+CREATE VIEW standings AS
+	SELECT players.id, players.name, matches.wins, matches.matches
+FROM players, matches WHERE players.id = matches.player_id ORDER BY matches.wins DESC,
+matches.matches DESC;
