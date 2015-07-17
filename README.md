@@ -29,3 +29,14 @@ The Swiss system produces a clear winner in just a few rounds, no-one is elimina
 System requirements:
 PostgreSQL
 Python 2.7
+
+
+Running the Program:
+#Clone the git Repository
+git clone https://github.com/anshulmotwani/tournament-results.git
+
+#run sql to create database schema
+psql -f tournament.sql
+
+#to test the project run
+python tournament_test.py
