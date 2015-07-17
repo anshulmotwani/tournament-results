@@ -1,4 +1,4 @@
- A Python module that uses the PostgreSQL database to keep track of players and matches in a game tournament. This project has two parts: defining the database schema (SQL table definitions), and writing code that will use it to track a Swiss tournament.
+A Python module that uses the PostgreSQL database to keep track of players and matches in a game tournament. This project has two parts: defining the database schema (SQL table definitions), and writing code that will use it to track a Swiss tournament.
 
 Example of a 16 Player Swiss Tournament:
 
@@ -27,6 +27,5 @@ For the fourth (and in this case final) round, the process repeats, and players 
 The Swiss system produces a clear winner in just a few rounds, no-one is eliminated and almost everyone wins at least one game, but there are many ties to deal with.
 
 System requirements:
-
 PostgreSQL
 Python 2.7
